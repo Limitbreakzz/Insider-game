@@ -213,7 +213,7 @@ export function HomePage() {
       </section>
 
       {/* ฝั่งขวา: ปุ่มสร้างห้อง / เล่นด่วน / เข้าห้อง */}
-      <aside className="tabletop-card animate-card-pop flex h-full flex-col justify-between gap-5 rounded-2xl p-6">
+      <aside className="tabletop-card animate-card-pop flex h-full flex-col justify-center gap-6 rounded-2xl p-6">
         {savedSession?.roomCode && (<div className="space-y-3 rounded-xl border border-[var(--accent-master)]/45 bg-[var(--accent-master)]/10 p-4">
             <div className="flex items-center justify-between gap-2">
               <h2 className="font-display text-sm font-bold text-[var(--accent-master)]">
