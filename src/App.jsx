@@ -50,45 +50,53 @@ export default function App() {
         prevPhaseRef.current = phase;
         if (!phase || !prev || phase === prev)
             return;
+        const shouldNarrate = gameState?.config?.controlMode === 'NARRATOR' && gameState?.me?.isHost;
         if (phase === 'ROLE_REVEAL') {
             sound.phaseChange();
             vibrateDevice([90, 50, 90]);
-            speakThai('เริ่มเกมแล้ว กรุณาเปิดดูบทบาทลับของคุณอย่างระมัดระวัง');
+            if (shouldNarrate)
+                speakThai('เริ่มเกมแล้ว กรุณาเปิดดูบทบาทลับของคุณอย่างระมัดระวัง');
         }
         else if (phase === 'QUESTION') {
             sound.phaseChange();
             vibrateDevice(100);
-            speakThai('เข้าสู่ช่วงถามตอบ เริ่มจับเวลาทายคำลับได้เลย');
+            if (shouldNarrate)
+                speakThai('เข้าสู่ช่วงถามตอบ เริ่มจับเวลาทายคำลับได้เลย');
         }
         else if (phase === 'DISCUSSION') {
             sound.wordFound();
             vibrateDevice([150, 70, 150]);
-            speakThai('มีคนทายคำลับถูกแล้ว พลิกนาฬิกาทราย เริ่มถกเถียงจับผิดอินไซเดอร์');
+            if (shouldNarrate)
+                speakThai('มีคนทายคำลับถูกแล้ว พลิกนาฬิกาทราย เริ่มถกเถียงจับผิดอินไซเดอร์');
         }
         else if (phase === 'VOTING') {
             sound.phaseChange();
             vibrateDevice([120, 60, 120]);
-            speakThai('หมดเวลาถกเถียง เข้าสู่ช่วงโหวตจับตัวอินไซเดอร์');
+            if (shouldNarrate)
+                speakThai('หมดเวลาถกเถียง เข้าสู่ช่วงโหวตจับตัวอินไซเดอร์');
         }
         else if (phase === 'RESULT') {
             vibrateDevice([200, 80, 200]);
             if (gameState?.result?.outcome === 'ALL_LOSE') {
                 sound.resultLose();
-                speakThai('หมดเวลา ทุกคนแพ้ในรอบนี้');
+                if (shouldNarrate)
+                    speakThai('หมดเวลา ทุกคนแพ้ในรอบนี้');
             }
             else if (gameState?.result?.outcome === 'COMMONERS_WIN') {
                 sound.resultWin();
-                speakThai('จับตัวอินไซเดอร์ได้แล้ว ชาวบ้านและมาสเตอร์เป็นฝ่ายชนะ');
+                if (shouldNarrate)
+                    speakThai('จับตัวอินไซเดอร์ได้แล้ว ชาวบ้านและมาสเตอร์เป็นฝ่ายชนะ');
             }
             else {
                 sound.resultWin();
-                speakThai('จับผิดคน อินไซเดอร์เป็นฝ่ายชนะคนเดียว');
+                if (shouldNarrate)
+                    speakThai('จับผิดคน อินไซเดอร์เป็นฝ่ายชนะคนเดียว');
             }
         }
         else {
             sound.phaseChange();
         }
-    }, [gameState?.phase, gameState?.result?.outcome]);
+    }, [gameState?.phase, gameState?.result?.outcome, gameState?.config?.controlMode, gameState?.me?.isHost]);
     const renderPhase = () => {
         if (!gameState)
             return <HomePage />;

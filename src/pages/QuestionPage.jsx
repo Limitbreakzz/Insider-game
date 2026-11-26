@@ -33,7 +33,7 @@ const QUICK_QUESTIONS = [
     'ทำจากธรรมชาติไหม?',
 ];
 export function QuestionPage() {
-    const { gameState, askQuestion, answerQuestion, error } = useGameStore();
+    const { gameState, askQuestion, answerQuestion, markGuesser, error } = useGameStore();
     const [questionText, setQuestionText] = useState('');
     const [guessText, setGuessText] = useState('');
     const feedEndRef = useRef(null);
@@ -42,10 +42,12 @@ export function QuestionPage() {
     }, [gameState?.questions.length]);
     if (!gameState || !gameState.me.role)
         return null;
-    const { me, players, questions, timer } = gameState;
+    const { me, players, questions, timer, config } = gameState;
     const playerMap = new Map(players.map((p) => [p.id, p]));
     const myRole = gameState.me.role;
     const isMaster = myRole === 'MASTER';
+    const isManualMaster = config.controlMode === 'MANUAL_HOST' && me.isHost && isMaster;
+    const guessCandidates = players.filter((p) => !p.isMaster);
     const handleAsk = async (e) => {
         e.preventDefault();
         if (!questionText.trim())
@@ -132,6 +134,28 @@ export function QuestionPage() {
                   </div>)))}
               <div ref={feedEndRef}/>
             </div>
+
+            {isManualMaster && (
+              <div className="mt-4 space-y-2.5 border-t border-[var(--border-card)] pt-4">
+                <div className="text-xs font-bold text-[var(--accent-master)]">
+                  โหมดหัวหน้าห้องคุมเกม — มีคนพูดทายคำถูกในวงจริงแล้ว? กดเลือกคนทายถูกได้เลย:
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {guessCandidates.map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      data-testid={`btn-mark-guesser-${p.name}`}
+                      onClick={() => void markGuesser(p.id)}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--accent-master)]/45 bg-[var(--accent-master)]/10 px-3 py-1.5 text-xs font-bold text-[var(--accent-master)] transition-colors hover:bg-[var(--accent-master)] hover:text-white"
+                    >
+                      <Sparkles aria-hidden="true" className="h-3.5 w-3.5" />
+                      {p.name} ทายถูก!
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {!isMaster && (<div className="mt-4 space-y-3 border-t border-[var(--border-card)] pt-4">
                 <div className="flex flex-wrap items-center gap-1.5">

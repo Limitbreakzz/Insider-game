@@ -1,10 +1,32 @@
-import { Bot, Check, Clock, Copy, Link2, Minus, Play, Plus, Settings2, Users } from 'lucide-react';
+import { Bot, Check, Clock, Copy, Link2, Minus, Play, Plus, Settings2, ShieldCheck, Smartphone, Users, Volume2 } from 'lucide-react';
 import { useState } from 'react';
 import { GameSelect } from '../components/GameSelect';
 import { PlayerList } from '../components/PlayerList';
 import { QrCodeBox } from '../components/QrCodeBox';
 import { UtilityBar } from '../components/UtilityBar';
+import { speakThai } from '../lib/feedback';
 import { useGameStore } from '../store/useGameStore';
+
+const CONTROL_MODES = [
+    {
+        id: 'AUTO',
+        title: 'โหมดอัตโนมัติ (แนะนำ)',
+        desc: 'สุ่มมาสเตอร์และคุมเวลาอัตโนมัติ สั่นเตือนส่วนตัว ไม่เปิดเสียงบรรยายออกลำโพง',
+        Icon: Smartphone,
+    },
+    {
+        id: 'NARRATOR',
+        title: 'เสียงบรรยายกลาง (Voice Narrator)',
+        desc: 'เปิดเสียงพากย์ภาษาไทยจากเครื่องหัวหน้าห้อง ประกาศทุกเฟสให้ทั้งวงได้ยิน',
+        Icon: Volume2,
+    },
+    {
+        id: 'MANUAL_HOST',
+        title: 'หัวหน้าห้องคุมเกม (Manual Master)',
+        desc: 'หัวหน้าห้องรับบทมาสเตอร์ประจำโต๊ะ กดข้ามเฟสและเลือกคนพูดทายถูกสดๆ ได้เอง',
+        Icon: ShieldCheck,
+    },
+];
 const CATEGORIES = [
     { value: 'ALL', label: 'ทุกหมวดหมู่ (สุ่มทั้งหมด)', hint: 'รวมคำลับทั้ง 80 คำทุกหมวด' },
     { value: 'EVERYDAY', label: 'ของใช้ใกล้ตัว', hint: 'ร่ม, เข็มทิศ, นาฬิกาทราย…' },
@@ -136,6 +158,66 @@ export function LobbyPage() {
           </div>
 
           <div className="space-y-5 text-sm">
+            {/* โหมดการคุมเกม (เหมือน Werewolf: AUTO / NARRATOR / MANUAL_HOST) */}
+            <div>
+              <div className="mb-1.5 flex items-center justify-between gap-2">
+                <span className="text-xs font-bold text-[var(--ink-secondary)]">โหมดการคุมเกม</span>
+                {config.controlMode === 'NARRATOR' && (
+                  <button
+                    type="button"
+                    onClick={() => speakThai('ทดสอบเสียงบรรยายกลาง เกมอินไซเดอร์พร้อมเริ่มแล้ว')}
+                    className="inline-flex items-center gap-1 rounded-lg border border-[var(--accent-master)]/40 bg-[var(--accent-master)]/10 px-2 py-0.5 text-[11px] font-bold text-[var(--accent-master)] transition-colors hover:bg-[var(--accent-master)]/20"
+                  >
+                    <Volume2 aria-hidden="true" className="h-3 w-3" />
+                    ทดสอบเสียงบรรยาย
+                  </button>
+                )}
+              </div>
+              <div className="space-y-2" data-testid="config-control-mode">
+                {CONTROL_MODES.map((m) => {
+                  const Icon = m.Icon;
+                  const active = (config.controlMode || 'AUTO') === m.id;
+                  return (
+                    <button
+                      key={m.id}
+                      type="button"
+                      disabled={!me.isHost}
+                      data-testid={`control-mode-${m.id}`}
+                      aria-pressed={active}
+                      onClick={() => void updateConfig({ controlMode: m.id })}
+                      className={`flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
+                        active
+                          ? 'border-[var(--accent-insider)] bg-[var(--accent-insider)]/10'
+                          : 'border-[var(--border-card)] bg-[var(--bg-table)] hover:border-[var(--ink-secondary)]/50'
+                      }`}
+                    >
+                      <div
+                        className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+                          active
+                            ? 'bg-[var(--accent-insider)] text-white'
+                            : 'bg-[var(--bg-subtle)] text-[var(--ink-secondary)]'
+                        }`}
+                      >
+                        <Icon aria-hidden="true" className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div
+                          className={`text-xs font-bold ${
+                            active ? 'text-[var(--accent-insider)]' : 'text-[var(--ink-primary)]'
+                          }`}
+                        >
+                          {m.title}
+                        </div>
+                        <div className="mt-0.5 text-[11px] leading-snug text-[var(--ink-secondary)]">
+                          {m.desc}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* เวลาเฟสถาม-ตอบ: Preset pills + Stepper (หน่วยเป็นนาที) */}
             <div>
               <div className="mb-1.5 flex items-center justify-between">

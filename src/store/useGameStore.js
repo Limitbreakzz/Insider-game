@@ -265,6 +265,24 @@ export const useGameStore = create((set, get) => ({
         }
         return true;
     },
+    advancePhase: async () => {
+        set({ error: null });
+        const res = await emitWithAck('game:advancePhase');
+        if (!res.ok) {
+            set({ error: res.error ?? 'ไม่สามารถข้ามเฟสได้' });
+            return false;
+        }
+        return true;
+    },
+    markGuesser: async (guesserPlayerId) => {
+        set({ error: null });
+        const res = await emitWithAck('question:markGuesser', { guesserPlayerId });
+        if (!res.ok) {
+            set({ error: res.error ?? 'ไม่สามารถระบุคนทายถูกได้' });
+            return false;
+        }
+        return true;
+    },
     playAgain: async () => {
         set({ error: null });
         const res = await emitWithAck('game:playAgain');

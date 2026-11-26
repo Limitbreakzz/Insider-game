@@ -1,4 +1,4 @@
-import { CheckCircle2, MessageCircle, Send, Sparkles } from 'lucide-react';
+import { CheckCircle2, FastForward, MessageCircle, Send, Sparkles } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { PlayerAvatar } from '../components/PlayerAvatar';
 import { PlayerList } from '../components/PlayerList';
@@ -12,7 +12,7 @@ const ANSWER_TH = {
     CORRECT: 'ถูกต้อง!',
 };
 export function DiscussionPage() {
-    const { gameState, sendMessage, setReady } = useGameStore();
+    const { gameState, sendMessage, setReady, advancePhase } = useGameStore();
     const [text, setText] = useState('');
     const chatEndRef = useRef(null);
     useEffect(() => {
@@ -20,10 +20,11 @@ export function DiscussionPage() {
     }, [gameState?.messages.length]);
     if (!gameState)
         return null;
-    const { me, players, messages, questions, guesserId, timer } = gameState;
+    const { me, players, messages, questions, guesserId, timer, config } = gameState;
     const playerMap = new Map(players.map((p) => [p.id, p]));
     const guesser = players.find((p) => p.id === guesserId);
     const myPlayer = players.find((p) => p.id === me.id);
+    const isManualHost = config.controlMode === 'MANUAL_HOST' && me.isHost;
     const handleSend = async (e) => {
         e.preventDefault();
         if (!text.trim())
@@ -43,12 +44,25 @@ export function DiscussionPage() {
               <strong>{guesser.name}</strong> เป็นคนทายคำลับถูก! ย้อนดูประวัติคำถามแล้วจับพิรุธกันเลย
             </span>
           </div>
-          <button type="button" data-testid="btn-ready-vote" onClick={() => void setReady(!myPlayer?.isReady)} className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition-colors ${myPlayer?.isReady
+          <div className="flex flex-wrap items-center gap-2">
+            {isManualHost && (
+              <button
+                type="button"
+                data-testid="btn-host-advance-voting"
+                onClick={() => void advancePhase()}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--accent-master)]/50 bg-[var(--accent-master)]/15 px-3.5 py-2 text-xs font-bold text-[var(--accent-master)] transition-colors hover:bg-[var(--accent-master)] hover:text-white"
+              >
+                <FastForward aria-hidden="true" className="h-3.5 w-3.5" />
+                ข้ามไปโหวตทันที
+              </button>
+            )}
+            <button type="button" data-testid="btn-ready-vote" onClick={() => void setReady(!myPlayer?.isReady)} className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition-colors ${myPlayer?.isReady
                 ? 'border border-emerald-600/40 bg-emerald-600 text-white'
                 : 'bg-[var(--accent-insider)] text-white hover:opacity-95'}`}>
-            <CheckCircle2 aria-hidden="true" className="h-4 w-4"/>
-            {myPlayer?.isReady ? 'พร้อมโหวตแล้ว ✓' : 'พร้อมโหวต'}
-          </button>
+              <CheckCircle2 aria-hidden="true" className="h-4 w-4"/>
+              {myPlayer?.isReady ? 'พร้อมโหวตแล้ว ✓' : 'พร้อมโหวต'}
+            </button>
+          </div>
         </div>)}
 
       <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
