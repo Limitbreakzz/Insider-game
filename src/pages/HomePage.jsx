@@ -28,8 +28,10 @@ export function HomePage() {
     const [avatar, setAvatar] = useState(initial.avatar);
     const [roomCode, setRoomCode] = useState('');
     const [uploadError, setUploadError] = useState(null);
+    const [nameError, setNameError] = useState(null);
     const [submitting, setSubmitting] = useState(false);
     const fileInputRef = useRef(null);
+    const nameInputRef = useRef(null);
     const hasPhoto = avatar.startsWith('data:image/');
     // รองรับลิงก์เชิญและ QR Code: /?room=ABCDEF
     useEffect(() => {
@@ -67,9 +69,11 @@ export function HomePage() {
             return;
         const cleanName = playerName.trim();
         if (!cleanName) {
-            setUploadError('กรุณาใส่ชื่อของคุณก่อนสร้างห้อง');
+            setNameError('กรุณาใส่ชื่อของคุณก่อนสร้างห้อง');
+            nameInputRef.current?.focus();
             return;
         }
+        setNameError(null);
         setUploadError(null);
         clearError();
         persistProfile(cleanName, avatar);
@@ -86,6 +90,7 @@ export function HomePage() {
             return;
         const cleanName = playerName.trim() || 'ผู้เล่น 1';
         setPlayerName(cleanName);
+        setNameError(null);
         setUploadError(null);
         clearError();
         persistProfile(cleanName, avatar);
@@ -103,11 +108,13 @@ export function HomePage() {
             return;
         const cleanName = playerName.trim();
         if (!cleanName) {
-            setUploadError('กรุณาใส่ชื่อของคุณก่อนเข้าห้อง');
+            setNameError('กรุณาใส่ชื่อของคุณก่อนเข้าห้อง');
+            nameInputRef.current?.focus();
             return;
         }
         if (!roomCode.trim())
             return;
+        setNameError(null);
         setUploadError(null);
         clearError();
         persistProfile(cleanName, avatar);
@@ -119,7 +126,16 @@ export function HomePage() {
             setSubmitting(false);
         }
     };
-    return (<div className="mx-auto flex min-h-screen max-w-[1060px] flex-col justify-center gap-7 px-6 py-9">
+    return (<div className="mx-auto flex min-h-screen max-w-[1060px] flex-col justify-center gap-5 px-6 py-6">
+      {(error || uploadError) && (<div role="alert" aria-live="polite" data-testid="error-banner" className="fixed left-1/2 top-4 z-50 flex -translate-x-1/2 items-center gap-3 rounded-xl border border-red-500/40 bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-red-700 shadow-lg dark:text-red-300">
+          <span>{error || uploadError}</span>
+          <button type="button" aria-label="ปิดการแจ้งเตือน" onClick={() => {
+                clearError();
+                setUploadError(null);
+            }} className="rounded-md p-0.5 hover:bg-red-500/10">
+            <X aria-hidden="true" className="h-4 w-4"/>
+          </button>
+        </div>)}
       {/* Inline Header (ไม่มี sticky navbar เต็มจอ — เหมือน werewolf-game-opal) */}
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-2.5">
@@ -203,17 +219,20 @@ export function HomePage() {
             <label htmlFor="playerName" className="mb-1.5 block text-xs font-bold text-[var(--ink-secondary)]">
               ชื่อของคุณในวงเกม
             </label>
-            <input id="playerName" name="playerName" data-testid="input-player-name" type="text" maxLength={24} autoComplete="off" spellCheck={false} placeholder="เช่น ต้น, มายด์, บีม…" value={playerName} onChange={(e) => {
+            <input ref={nameInputRef} id="playerName" name="playerName" data-testid="input-player-name" type="text" maxLength={24} autoComplete="off" spellCheck={false} placeholder="เช่น ต้น, มายด์, บีม…" value={playerName} onChange={(e) => {
             setPlayerName(e.target.value);
-            if (uploadError)
-                setUploadError(null);
-        }} className="w-full rounded-xl border border-[var(--border-card)] bg-[var(--bg-table)] px-3.5 py-2.5 text-sm font-medium transition-colors focus:border-[var(--accent-insider)]"/>
+            if (nameError)
+                setNameError(null);
+        }} className={`w-full rounded-xl border bg-[var(--bg-table)] px-3.5 py-2.5 text-sm font-medium transition-colors focus:border-[var(--accent-insider)] ${nameError ? 'border-red-500' : 'border-[var(--border-card)]'}`}/>
+            {nameError && (<p role="alert" data-testid="name-error" className="mt-1.5 text-xs font-semibold text-red-600 dark:text-red-400">
+                {nameError}
+              </p>)}
           </div>
         </div>
       </section>
 
       {/* ฝั่งขวา: ปุ่มสร้างห้อง / เล่นด่วน / เข้าห้อง */}
-      <aside className="tabletop-card animate-card-pop flex h-full flex-col justify-center gap-7 rounded-2xl p-7">
+      <aside className="tabletop-card animate-card-pop flex h-full flex-col justify-center gap-6 rounded-2xl p-6">
         {savedSession?.roomCode && (<div className="space-y-3 rounded-xl border border-[var(--accent-master)]/45 bg-[var(--accent-master)]/10 p-4">
             <div className="flex items-center justify-between gap-2">
               <h2 className="font-display text-base font-bold text-[var(--accent-master)]">
@@ -233,10 +252,6 @@ export function HomePage() {
               <RotateCcw aria-hidden="true" className="h-4 w-4"/>
               กลับเข้าห้องเดิม
             </button>
-          </div>)}
-
-        {(error || uploadError) && (<div role="alert" aria-live="polite" data-testid="error-banner" className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-700 dark:text-red-300">
-            {error || uploadError}
           </div>)}
 
         {/* สร้างโต๊ะใหม่ + เล่นด่วนกับบอท */}
