@@ -189,7 +189,7 @@ export function QuestionPage() {
 
         {/* ฝั่งขวา: การ์ดบทบาทและรายชื่อ */}
         <div className="space-y-4">
-          <RoleCard role={myRole} secretWord={me.secretWord}/>
+          <RoleCard role={myRole} secretWord={me.secretWord} knownInsiderName={me.knownInsiderName}/>
           <div className="tabletop-card rounded-2xl p-4">
             <h3 className="mb-3 font-display text-sm font-bold text-[var(--ink-secondary)]">
               ผู้เล่นในวง

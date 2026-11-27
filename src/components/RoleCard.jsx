@@ -23,7 +23,7 @@ const ROLE_META = {
         tip: 'ช่วยกันถามคำถามใช่/ไม่ใช่ เพื่อหาคำลับให้ทันเวลา แล้วสังเกตให้ดีว่าใครถามนำแปลกๆ เหมือนรู้คำตอบอยู่แล้ว!',
     },
 };
-export function RoleCard({ role, secretWord, defaultRevealed = false }) {
+export function RoleCard({ role, secretWord, knownInsiderName = null, defaultRevealed = false }) {
     const [revealed, setRevealed] = useState(defaultRevealed);
     const meta = ROLE_META[role];
     const Icon = role === 'MASTER' ? Shield : role === 'INSIDER' ? KeyRound : User;
@@ -72,6 +72,18 @@ export function RoleCard({ role, secretWord, defaultRevealed = false }) {
             </div>) : (<div data-testid="no-secret-word-box" className="rounded-xl bg-[var(--bg-subtle)]/70 p-4 text-center text-xs text-[var(--ink-secondary)]">
               คุณไม่รู้คำลับ ช่วยกันถามคำถามกับมาสเตอร์เพื่อหาคำตอบให้เจอ!
             </div>)}
+
+          {role === 'MASTER' && knownInsiderName && (
+            <div
+              data-testid="master-known-insider"
+              className="flex items-center justify-between rounded-xl border border-[var(--accent-master)]/40 bg-[var(--accent-master)]/10 px-3.5 py-2 text-xs"
+            >
+              <span className="font-semibold text-[var(--ink-secondary)]">อินไซเดอร์รอบนี้</span>
+              <span className="font-display text-sm font-bold text-[var(--accent-insider)]">
+                {knownInsiderName}
+              </span>
+            </div>
+          )}
 
           <p className="text-sm leading-relaxed text-[var(--ink-secondary)]">{meta.tip}</p>
         </div>)}

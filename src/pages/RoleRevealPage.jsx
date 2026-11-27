@@ -183,6 +183,23 @@ export function RoleRevealPage() {
                   </div>
                 )}
 
+                {me.role === 'MASTER' && me.knownInsiderName && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    data-testid="master-known-insider"
+                    className="mt-3 flex w-full items-center justify-between rounded-xl border border-[var(--accent-master)]/40 bg-[var(--accent-master)]/10 px-4 py-2.5 text-xs"
+                  >
+                    <span className="font-semibold text-[var(--ink-secondary)]">
+                      อินไซเดอร์ประจำรอบนี้ (เห็นเฉพาะมาสเตอร์)
+                    </span>
+                    <span className="font-display text-sm font-bold text-[var(--accent-insider)]">
+                      {me.knownInsiderName}
+                    </span>
+                  </motion.div>
+                )}
+
                 <p className="mt-4 max-w-md text-sm leading-relaxed text-[var(--ink-secondary)]">
                   {meta.desc}
                 </p>

@@ -73,7 +73,8 @@ export function LobbyPage() {
         void updateCustomWords(customWords.filter((w) => w !== wordToRemove));
     };
     const myPlayer = players.find((p) => p.id === me.id);
-    const canStart = me.isHost && players.length >= config.minPlayers;
+    const unreadyGuestsCount = players.filter((p) => !p.isHost && !p.isReady).length;
+    const canStart = me.isHost && players.length >= config.minPlayers && unreadyGuestsCount === 0;
     const copyCode = async () => {
         try {
             await navigator.clipboard.writeText(roomCode);
@@ -130,11 +131,13 @@ export function LobbyPage() {
         <div className="flex flex-col items-end gap-2.5">
           <UtilityBar showLeave/>
           <div className="flex flex-wrap items-center justify-end gap-2">
-            <button type="button" data-testid="btn-toggle-ready" onClick={() => void setReady(!myPlayer?.isReady)} className={`h-10 rounded-xl px-4 text-sm font-bold transition-colors ${myPlayer?.isReady
+            {!me.isHost && (
+              <button type="button" data-testid="btn-toggle-ready" onClick={() => void setReady(!myPlayer?.isReady)} className={`h-10 rounded-xl px-4 text-sm font-bold transition-colors ${myPlayer?.isReady
             ? 'border border-emerald-500/40 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
             : 'border border-[var(--border-card)] bg-[var(--bg-subtle)] hover:opacity-90'}`}>
-              {myPlayer?.isReady ? 'พร้อมเล่นแล้ว ✓' : 'กดพร้อมเล่น'}
-            </button>
+                {myPlayer?.isReady ? 'พร้อมเล่นแล้ว ✓' : 'กดพร้อมเล่น'}
+              </button>
+            )}
 
             {me.isHost && players.length < config.maxPlayers && (<button type="button" data-testid="btn-add-bot" onClick={() => void addBot()} className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-[var(--border-card)] bg-[var(--bg-card)] px-3.5 text-sm font-bold transition-colors hover:bg-[var(--bg-subtle)]">
                 <Bot aria-hidden="true" className="h-4 w-4 text-[var(--accent-commoner)]"/>
@@ -143,7 +146,9 @@ export function LobbyPage() {
 
             {me.isHost && (<button type="button" data-testid="btn-start-game" disabled={!canStart} onClick={() => void startGame()} className="inline-flex h-10 items-center gap-2 rounded-xl bg-[var(--accent-insider)] px-5 text-sm font-bold text-white transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-45">
                 <Play aria-hidden="true" className="h-4 w-4"/>
-                เริ่มเกมเลย
+                {unreadyGuestsCount > 0 && players.length >= config.minPlayers
+                  ? `รอเพื่อนพร้อมอีก ${unreadyGuestsCount} คน`
+                  : 'เริ่มเกมเลย'}
               </button>)}
           </div>
         </div>
