@@ -1,14 +1,25 @@
+import { AnimatePresence, motion } from 'framer-motion';
 import { Bot, CheckCircle2, Crown, Eye, Shield, UserCheck, UserX, WifiOff } from 'lucide-react';
 import { PlayerAvatar } from './PlayerAvatar';
 export function PlayerList({ players, myId, guesserId, votedPlayerIds = [], showReady = false, canKick = false, onKick, }) {
     return (<ul className="space-y-2" data-testid="player-list">
+      <AnimatePresence initial={false}>
       {players.map((p) => {
             const isMe = p.id === myId;
             const isGuesser = guesserId === p.id;
             const hasVoted = votedPlayerIds.includes(p.id);
-            return (<li key={p.id} data-testid={`player-item-${p.name}`} className={`flex items-center justify-between gap-2 rounded-xl border px-3.5 py-2.5 transition-colors ${isMe
+            return (<motion.li
+              key={p.id}
+              layout
+              initial={{ opacity: 0, y: 8, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              data-testid={`player-item-${p.name}`}
+              className={`flex items-center justify-between gap-2 rounded-xl border px-3.5 py-2.5 transition-colors ${isMe
                     ? 'border-[var(--accent-commoner)]/50 bg-[var(--accent-commoner)]/8'
-                    : 'border-[var(--border-card)] bg-[var(--bg-card)]'} ${!p.isConnected ? 'opacity-60' : ''}`}>
+                    : 'border-[var(--border-card)] bg-[var(--bg-card)]'} ${!p.isConnected ? 'opacity-60' : ''}`}
+            >
             <div className="flex min-w-0 items-center gap-2.5">
               <PlayerAvatar name={p.name} avatar={p.avatar} isBot={p.isBot} isMaster={p.isMaster}/>
               <div className="min-w-0">
@@ -56,7 +67,8 @@ export function PlayerList({ players, myId, guesserId, votedPlayerIds = [], show
                   <UserX aria-hidden="true" className="h-3.5 w-3.5"/>
                 </button>)}
             </div>
-          </li>);
+          </motion.li>);
         })}
+      </AnimatePresence>
     </ul>);
 }

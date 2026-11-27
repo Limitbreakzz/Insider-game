@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { CheckCircle2, FastForward, MessageCircle, Send, Sparkles } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { PlayerAvatar } from '../components/PlayerAvatar';
@@ -78,7 +79,7 @@ export function DiscussionPage() {
                 ใครถามคำถามแม่นผิดปกติเหมือนรู้คำตอบอยู่แล้ว? เริ่มคุยกันเลย!
               </p>) : (messages.map((m) => {
             const sender = playerMap.get(m.playerId);
-            return (<div key={m.id} className={`flex items-start gap-2.5 rounded-xl px-3.5 py-2.5 text-sm ${m.playerId === me.id
+            return (<motion.div key={m.id} initial={{ opacity: 0, y: 8, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.18 }} className={`flex items-start gap-2.5 rounded-xl px-3.5 py-2.5 text-sm ${m.playerId === me.id
                     ? 'ml-6 bg-[var(--accent-commoner)]/12'
                     : 'mr-6 bg-[var(--bg-table)]'}`}>
                     <PlayerAvatar name={m.playerName} avatar={sender?.avatar} isBot={sender?.isBot} isMaster={sender?.isMaster} size="sm"/>
@@ -88,7 +89,7 @@ export function DiscussionPage() {
                       </div>
                       <p className="mt-0.5 break-words">{m.text}</p>
                     </div>
-                  </div>);
+                  </motion.div>);
         }))}
             <div ref={chatEndRef}/>
           </div>

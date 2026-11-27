@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { CheckCircle2, Shield, ThumbsDown, ThumbsUp, Vote } from 'lucide-react';
 import { useState } from 'react';
 import { PlayerAvatar } from '../components/PlayerAvatar';
@@ -64,20 +65,20 @@ export function VotingPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <button type="button" data-testid="btn-vote-guesser-yes" onClick={() => {
+                <motion.button whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} type="button" data-testid="btn-vote-guesser-yes" onClick={() => {
                 sound.voteCast();
                 void voteGuesser(true);
             }} className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-[var(--accent-insider)] bg-[var(--accent-insider)]/10 p-5 font-display text-base font-bold text-[var(--accent-insider)] transition-colors hover:bg-[var(--accent-insider)] hover:text-white">
                   <ThumbsUp aria-hidden="true" className="h-6 w-6"/>
                   ใช่ — อินไซเดอร์!
-                </button>
-                <button type="button" data-testid="btn-vote-guesser-no" onClick={() => {
+                </motion.button>
+                <motion.button whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} type="button" data-testid="btn-vote-guesser-no" onClick={() => {
                 sound.voteCast();
                 void voteGuesser(false);
             }} className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-[var(--accent-commoner)] bg-[var(--accent-commoner)]/10 p-5 font-display text-base font-bold text-[var(--accent-commoner)] transition-colors hover:bg-[var(--accent-commoner)] hover:text-white">
                   <ThumbsDown aria-hidden="true" className="h-6 w-6"/>
                   ไม่ใช่ — คนอื่นแน่ๆ
-                </button>
+                </motion.button>
               </div>
             </div>) : (<div className="space-y-4">
               <div>

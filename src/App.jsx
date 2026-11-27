@@ -1,3 +1,4 @@
+import { AnimatePresence, motion, MotionConfig } from 'framer-motion';
 import { useEffect, useRef } from 'react';
 import { RulesModal } from './components/RulesModal';
 import { speakThai, vibrateDevice } from './lib/feedback';
@@ -117,11 +118,26 @@ export default function App() {
                 return <HomePage />;
         }
     };
-    return (<div className="min-h-screen">
-      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-3 focus:z-50 focus:rounded-lg focus:bg-[var(--accent-insider)] focus:px-3 focus:py-2 focus:text-xs focus:font-bold focus:text-white">
-        ข้ามไปยังเนื้อหาหลัก
-      </a>
-      <main id="main-content">{renderPhase()}</main>
-      <RulesModal />
-    </div>);
+    const phaseKey = gameState ? gameState.phase : 'HOME';
+    return (<MotionConfig reducedMotion="user">
+      <div className="min-h-screen">
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-3 focus:z-50 focus:rounded-lg focus:bg-[var(--accent-insider)] focus:px-3 focus:py-2 focus:text-xs focus:font-bold focus:text-white">
+          ข้ามไปยังเนื้อหาหลัก
+        </a>
+        <main id="main-content">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={phaseKey}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            >
+              {renderPhase()}
+            </motion.div>
+          </AnimatePresence>
+        </main>
+        <RulesModal />
+      </div>
+    </MotionConfig>);
 }

@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { Check, HelpCircle, MessageSquarePlus, Send, Sparkles, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { PlayerAvatar } from '../components/PlayerAvatar';
@@ -91,7 +92,7 @@ export function QuestionPage() {
               {questions.length === 0 ? (<div className="flex h-48 flex-col items-center justify-center text-center text-sm text-[var(--ink-secondary)]">
                   <MessageSquarePlus aria-hidden="true" className="mb-2 h-6 w-6 opacity-50"/>
                   ยังไม่มีคำถาม เริ่มถามมาสเตอร์ได้เลย!
-                </div>) : (questions.map((q) => (<div key={q.id} data-testid={`question-item-${q.id}`} className={`rounded-xl border p-3.5 ${q.kind === 'GUESS'
+                </div>) : (questions.map((q) => (<motion.div key={q.id} initial={{ opacity: 0, y: 10, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.2 }} data-testid={`question-item-${q.id}`} className={`rounded-xl border p-3.5 ${q.kind === 'GUESS'
                 ? 'border-[var(--accent-master)]/40 bg-[var(--accent-master)]/6'
                 : 'border-[var(--border-card)] bg-[var(--bg-table)]/70'}`}>
                     <div className="flex flex-wrap items-start justify-between gap-2">
@@ -131,7 +132,7 @@ export function QuestionPage() {
                           รอมาสเตอร์ตอบ…
                         </span>)}
                     </div>
-                  </div>)))}
+                  </motion.div>)))}
               <div ref={feedEndRef}/>
             </div>
 

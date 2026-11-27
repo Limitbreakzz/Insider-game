@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from 'framer-motion';
 import { CheckCircle2, Eye, EyeOff, FastForward, KeyRound, Shield, User } from 'lucide-react';
 import { useState } from 'react';
 import { PlayerList } from '../components/PlayerList';
@@ -76,99 +77,129 @@ export function RoleRevealPage() {
       )}
 
       <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
-        {/* Dramatic Centered Role Reveal Card (สไตล์ Werewolf Overlay Card) */}
+        {/* Dramatic Centered Role Reveal Card (3D Spring Flip) */}
         <section
-          className="tabletop-card animate-card-pop mx-auto flex w-full max-w-lg flex-col items-center rounded-2xl p-7 text-center"
+          className="tabletop-card mx-auto flex w-full max-w-lg flex-col items-center overflow-hidden rounded-2xl p-7 text-center"
+          style={{ perspective: 1000 }}
           data-testid="role-card"
         >
-          {!peeked ? (
-            <>
-              <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full border-2 border-[var(--accent-master)]/40 bg-[var(--accent-master)]/12 text-[var(--accent-master)]">
-                <Eye aria-hidden="true" className="h-9 w-9" />
-              </div>
-
-              <h1 className="font-display text-2xl font-bold tracking-tight">
-                การ์ดบทบาทส่วนตัวของคุณ
-              </h1>
-              <p className="mt-2 max-w-sm text-sm leading-relaxed text-[var(--ink-secondary)]">
-                การ์ดถูกซ่อนอยู่ — ระวังคนข้างๆ แอบดูหน้าจอ แตะปุ่มด้านล่างเมื่อพร้อมเปิดดูบทบาทลับ
-              </p>
-
-              <button
-                type="button"
-                data-testid="toggle-role-visibility"
-                onClick={() => setPeeked(true)}
-                className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--accent-master)] px-5 text-base font-bold text-white transition-opacity hover:opacity-95"
+          <AnimatePresence mode="wait" initial={false}>
+            {!peeked ? (
+              <motion.div
+                key="hidden"
+                initial={{ opacity: 0, rotateY: -75, scale: 0.94 }}
+                animate={{ opacity: 1, rotateY: 0, scale: 1 }}
+                exit={{ opacity: 0, rotateY: 75, scale: 0.94 }}
+                transition={{ type: 'spring', stiffness: 280, damping: 24 }}
+                className="flex w-full flex-col items-center"
               >
-                <Eye aria-hidden="true" className="h-5 w-5" />
-                แตะเพื่อเปิดดูบทบาท
-              </button>
-            </>
-          ) : (
-            <>
-              <div
-                className={`mb-4 flex h-20 w-20 items-center justify-center rounded-full border-2 ${meta.emblemClass}`}
-              >
-                <RoleIcon aria-hidden="true" className="h-9 w-9" />
-              </div>
-
-              <div className="text-xs font-semibold text-[var(--ink-secondary)]">
-                บทบาทของคุณคือ
-              </div>
-              <h1
-                data-testid="my-role-label"
-                className={`font-display mt-1 text-3xl font-bold tracking-tight ${meta.accentColor}`}
-              >
-                {meta.nameTh} ({meta.nameEn})
-              </h1>
-
-              <div className="mt-2.5">
-                <span
-                  className={`inline-block rounded-full border px-3 py-1 text-xs font-bold ${meta.teamClass}`}
+                <motion.div
+                  animate={{ y: [0, -4, 0] }}
+                  transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
+                  className="mb-4 flex h-20 w-20 items-center justify-center rounded-full border-2 border-[var(--accent-master)]/40 bg-[var(--accent-master)]/12 text-[var(--accent-master)]"
                 >
-                  {meta.teamLabel}
-                </span>
-              </div>
+                  <Eye aria-hidden="true" className="h-9 w-9" />
+                </motion.div>
 
-              {me.secretWord ? (
-                <div
-                  data-testid="secret-word-box"
-                  className="mt-5 w-full rounded-xl border border-dashed border-[var(--accent-insider)]/50 bg-[var(--accent-insider)]/8 px-4 py-3.5"
+                <h1 className="font-display text-2xl font-bold tracking-tight">
+                  การ์ดบทบาทส่วนตัวของคุณ
+                </h1>
+                <p className="mt-2 max-w-sm text-sm leading-relaxed text-[var(--ink-secondary)]">
+                  การ์ดถูกซ่อนอยู่ — ระวังคนข้างๆ แอบดูหน้าจอ แตะปุ่มด้านล่างเมื่อพร้อมเปิดดูบทบาทลับ
+                </p>
+
+                <motion.button
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.97 }}
+                  type="button"
+                  data-testid="toggle-role-visibility"
+                  onClick={() => setPeeked(true)}
+                  className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--accent-master)] px-5 text-base font-bold text-white transition-opacity hover:opacity-95"
                 >
-                  <div className="text-xs font-semibold text-[var(--ink-secondary)]">
-                    คำลับประจำรอบนี้
-                  </div>
-                  <div
-                    data-testid="secret-word-value"
-                    className="font-display mt-1 text-3xl font-bold tracking-tight text-[var(--accent-insider)]"
+                  <Eye aria-hidden="true" className="h-5 w-5" />
+                  แตะเพื่อเปิดดูบทบาท
+                </motion.button>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="revealed"
+                initial={{ opacity: 0, rotateY: 75, scale: 0.94 }}
+                animate={{ opacity: 1, rotateY: 0, scale: 1 }}
+                exit={{ opacity: 0, rotateY: -75, scale: 0.94 }}
+                transition={{ type: 'spring', stiffness: 280, damping: 24 }}
+                className="flex w-full flex-col items-center"
+              >
+                <motion.div
+                  initial={{ scale: 0.7, rotate: -10 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: 'spring', stiffness: 340, damping: 18, delay: 0.08 }}
+                  className={`mb-4 flex h-20 w-20 items-center justify-center rounded-full border-2 ${meta.emblemClass}`}
+                >
+                  <RoleIcon aria-hidden="true" className="h-9 w-9" />
+                </motion.div>
+
+                <div className="text-xs font-semibold text-[var(--ink-secondary)]">
+                  บทบาทของคุณคือ
+                </div>
+                <h1
+                  data-testid="my-role-label"
+                  className={`font-display mt-1 text-3xl font-bold tracking-tight ${meta.accentColor}`}
+                >
+                  {meta.nameTh} ({meta.nameEn})
+                </h1>
+
+                <div className="mt-2.5">
+                  <span
+                    className={`inline-block rounded-full border px-3 py-1 text-xs font-bold ${meta.teamClass}`}
                   >
-                    {me.secretWord}
+                    {meta.teamLabel}
+                  </span>
+                </div>
+
+                {me.secretWord ? (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9, y: 8 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{ type: 'spring', stiffness: 320, damping: 22, delay: 0.14 }}
+                    data-testid="secret-word-box"
+                    className="mt-5 w-full rounded-xl border border-dashed border-[var(--accent-insider)]/50 bg-[var(--accent-insider)]/8 px-4 py-3.5"
+                  >
+                    <div className="text-xs font-semibold text-[var(--ink-secondary)]">
+                      คำลับประจำรอบนี้
+                    </div>
+                    <div
+                      data-testid="secret-word-value"
+                      className="font-display mt-1 text-3xl font-bold tracking-tight text-[var(--accent-insider)]"
+                    >
+                      {me.secretWord}
+                    </div>
+                  </motion.div>
+                ) : (
+                  <div
+                    data-testid="no-secret-word-box"
+                    className="mt-5 w-full rounded-xl bg-[var(--bg-subtle)]/80 px-4 py-3 text-xs font-medium text-[var(--ink-secondary)]"
+                  >
+                    คุณไม่รู้คำลับ — ช่วยกันถามคำถามกับมาสเตอร์เพื่อหาคำตอบให้เจอ!
                   </div>
-                </div>
-              ) : (
-                <div
-                  data-testid="no-secret-word-box"
-                  className="mt-5 w-full rounded-xl bg-[var(--bg-subtle)]/80 px-4 py-3 text-xs font-medium text-[var(--ink-secondary)]"
+                )}
+
+                <p className="mt-4 max-w-md text-sm leading-relaxed text-[var(--ink-secondary)]">
+                  {meta.desc}
+                </p>
+
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  type="button"
+                  data-testid="toggle-role-visibility"
+                  onClick={() => setPeeked(false)}
+                  className="mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[var(--border-card)] bg-[var(--bg-subtle)] px-4 text-sm font-bold text-[var(--ink-primary)] transition-colors hover:bg-[var(--border-card)]/60"
                 >
-                  คุณไม่รู้คำลับ — ช่วยกันถามคำถามกับมาสเตอร์เพื่อหาคำตอบให้เจอ!
-                </div>
-              )}
-
-              <p className="mt-4 max-w-md text-sm leading-relaxed text-[var(--ink-secondary)]">
-                {meta.desc}
-              </p>
-
-              <button
-                type="button"
-                data-testid="toggle-role-visibility"
-                onClick={() => setPeeked(false)}
-                className="mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[var(--border-card)] bg-[var(--bg-subtle)] px-4 text-sm font-bold text-[var(--ink-primary)] transition-colors hover:bg-[var(--border-card)]/60"
-              >
-                <EyeOff aria-hidden="true" className="h-4 w-4" />
-                ซ่อนการ์ดกลับ (ป้องกันคนแอบดู)
-              </button>
-            </>
-          )}
+                  <EyeOff aria-hidden="true" className="h-4 w-4" />
+                  ซ่อนการ์ดกลับ (ป้องกันคนแอบดู)
+                </motion.button>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* ปุ่มยืนยันพร้อมเริ่มเกม */}
           <div className="mt-3 w-full space-y-2.5 border-t border-[var(--border-card)] pt-4">
