@@ -1,4 +1,4 @@
-import { BookOpen, DoorOpen, KeyRound, RotateCcw, Shield, Trash2, Upload, Users, X, Zap, } from 'lucide-react';
+import { BookOpen, DoorOpen, KeyRound, RotateCcw, Shield, Trash2, Upload, User, Users, X, Zap, } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { PlayerAvatar } from '../components/PlayerAvatar';
 import { UtilityBar } from '../components/UtilityBar';
@@ -183,11 +183,27 @@ export function HomePage() {
           </div>
         </div>
 
-        {/* การ์ดตั้งโปรไฟล์: อัปโหลดรูป + ชื่อเล่น */}
+        {/* การ์ดตั้งโปรไฟล์: อัปโหลดรูป + ชื่อเล่น (สไตล์วงกลมข้างข้อความเหมือน Werewolf) */}
         <div className="tabletop-card animate-card-pop space-y-5 rounded-2xl p-6">
-          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-            <button type="button" onClick={() => fileInputRef.current?.click()} title="แตะเพื่อเลือกรูปโปรไฟล์" aria-label="เลือกรูปโปรไฟล์" className="group relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-[var(--border-card)] bg-[var(--bg-table)] transition-colors hover:border-[var(--accent-insider)]">
-              {hasPhoto ? (<img src={avatar} width={80} height={80} alt="ตัวอย่างรูปโปรไฟล์ของคุณ" className="h-full w-full object-cover"/>) : (<PlayerAvatar name={playerName || 'IN'} size="lg"/>)}
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              title="แตะเพื่อเลือกรูปโปรไฟล์"
+              aria-label="เลือกรูปโปรไฟล์"
+              className="group relative flex h-18 w-18 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[var(--border-card)] bg-[var(--bg-table)] text-[var(--accent-master)] transition-colors hover:border-[var(--accent-insider)]"
+            >
+              {hasPhoto ? (
+                <img
+                  src={avatar}
+                  width={72}
+                  height={72}
+                  alt="ตัวอย่างรูปโปรไฟล์ของคุณ"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <User aria-hidden="true" className="h-7 w-7" strokeWidth={1.75} />
+              )}
               <span className="absolute inset-x-0 bottom-0 bg-black/55 py-0.5 text-center text-[10px] font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100">
                 เปลี่ยนรูป
               </span>
@@ -196,22 +212,39 @@ export function HomePage() {
             <div className="min-w-0 flex-1">
               <div className="text-sm font-bold text-[var(--ink-primary)]">รูปโปรไฟล์ของคุณ</div>
               <p className="mt-0.5 text-xs text-[var(--ink-secondary)]">
-                เลือกรูปจากมือถือหรือคอมพิวเตอร์ (ไม่ใส่ก็ได้ ระบบจะย่อขนาดให้อัตโนมัติ)
+                เลือกรูปจากมือถือหรือคอมพิวเตอร์ (ไม่ใส่ก็ได้)
               </p>
               <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                <button type="button" data-testid="btn-upload-avatar" onClick={() => fileInputRef.current?.click()} className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-card)] bg-[var(--bg-subtle)] px-3 py-1.5 text-xs font-semibold transition-colors hover:bg-[var(--border-card)]/60">
-                  <Upload aria-hidden="true" className="h-3.5 w-3.5"/>
+                <button
+                  type="button"
+                  data-testid="btn-upload-avatar"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-card)] bg-[var(--bg-subtle)] px-3 py-1.5 text-xs font-semibold transition-colors hover:bg-[var(--border-card)]/60"
+                >
+                  <Upload aria-hidden="true" className="h-3.5 w-3.5" />
                   {hasPhoto ? 'เปลี่ยนรูป' : 'เลือกรูปภาพ'}
                 </button>
-                {hasPhoto && (<button type="button" onClick={() => {
-                setAvatar('');
-                persistProfile(playerName, '');
-            }} className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-red-600 transition-colors hover:bg-red-500/10 dark:text-red-400">
-                    <Trash2 aria-hidden="true" className="h-3.5 w-3.5"/>
+                {hasPhoto && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAvatar('');
+                      persistProfile(playerName, '');
+                    }}
+                    className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-red-600 transition-colors hover:bg-red-500/10 dark:text-red-400"
+                  >
+                    <Trash2 aria-hidden="true" className="h-3.5 w-3.5" />
                     ลบรูป
-                  </button>)}
+                  </button>
+                )}
               </div>
-              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => void handleFileChange(e)}/>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => void handleFileChange(e)}
+              />
             </div>
           </div>
 
