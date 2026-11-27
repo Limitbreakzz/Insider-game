@@ -202,6 +202,15 @@ export const useGameStore = create((set, get) => ({
         }
         return true;
     },
+    updateCustomWords: async (words) => {
+        set({ error: null });
+        const res = await emitWithAck('room:updateCustomWords', { words });
+        if (!res.ok) {
+            set({ error: res.error ?? 'ไม่สามารถบันทึกคำลับเองได้' });
+            return false;
+        }
+        return true;
+    },
     startGame: async () => {
         set({ error: null });
         const res = await emitWithAck('game:start');
