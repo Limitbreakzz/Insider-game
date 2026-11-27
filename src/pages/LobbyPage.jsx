@@ -280,7 +280,7 @@ export function LobbyPage() {
               </div>
             </div>
 
-            {/* รูปแบบการโหวต: Segmented Choice Cards */}
+            {/* รูปแบบการโหวต: Segmented Choice Cards + คำอธิบายเข้าใจง่าย */}
             <div>
               <span className="mb-1.5 block text-xs font-bold text-[var(--ink-secondary)]">
                 รูปแบบการโหวต
@@ -294,8 +294,8 @@ export function LobbyPage() {
             : 'text-[var(--ink-primary)]'}`}>
                     ต้นฉบับ 2 ขั้นตอน
                   </div>
-                  <div className="mt-0.5 text-[11px] text-[var(--ink-secondary)]">
-                    โหวตคนทายถูก → ชี้ตัว
+                  <div className="mt-0.5 text-[11px] leading-snug text-[var(--ink-secondary)]">
+                    โหวตคนทายถูกก่อน ค่อยชี้ตัว
                   </div>
                 </button>
 
@@ -307,11 +307,16 @@ export function LobbyPage() {
             : 'text-[var(--ink-primary)]'}`}>
                     โหวตชี้ตัวโดยตรง
                   </div>
-                  <div className="mt-0.5 text-[11px] text-[var(--ink-secondary)]">
-                    เลือกผู้ต้องสงสัยทันที
+                  <div className="mt-0.5 text-[11px] leading-snug text-[var(--ink-secondary)]">
+                    รอบเดียวจบ (แนะนำมือใหม่)
                   </div>
                 </button>
               </div>
+              <p className="mt-2 rounded-lg bg-[var(--bg-table)] px-3 py-2 text-[11px] leading-relaxed text-[var(--ink-secondary)]">
+                {config.votingMode === 'TWO_STAGE'
+                  ? 'กติกาแท้ 2 รอบ: รอบ 1 โหวต “ใช่/ไม่ใช่” ว่าคนทายคำถูกคืออินไซเดอร์ไหม (เกินครึ่งจบเลย) → รอบ 2 ถ้าไม่ถึงครึ่ง ให้ทุกคนชี้ตัวเลือกผู้ต้องสงสัย 1 คน'
+                  : 'แบบเร็ว 1 รอบจบ: ข้ามรอบโหวตคนทายถูก จบถกเถียงแล้วทุกคนเลือกชี้ตัวผู้ต้องสงสัย 1 คนทันที ใครโดนชี้เยอะสุดถูกเปิดไพ่'}
+              </p>
             </div>
 
             {/* เวลาเฟสถกเถียง: Segmented Choice Cards */}
