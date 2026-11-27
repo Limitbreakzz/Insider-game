@@ -26,7 +26,7 @@ export function UtilityBar({ showLeave = false, rulesLabel = 'กติกา' }
 
       {showLeave && (<button type="button" onClick={() => void leaveRoom()} data-testid="leave-room-btn" className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-red-500/30 bg-red-500/10 px-3 text-xs font-semibold text-red-700 transition-colors hover:bg-red-500/20 dark:text-red-300">
           <LogOut aria-hidden="true" className="h-3.5 w-3.5"/>
-          <span className="hidden sm:inline">ออกห้อง</span>
+          <span>ออกจากห้อง</span>
         </button>)}
     </div>);
 }

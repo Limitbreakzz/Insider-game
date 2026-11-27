@@ -1,4 +1,4 @@
-import { Bot, Cat, Crown, Flame, Ghost, Heart, Sparkles, Star, Zap } from 'lucide-react';
+import { Bot, Cat, Crown, Flame, Ghost, Heart, Sparkles, Star, User, Zap } from 'lucide-react';
 export const AVATAR_PRESETS = [
     { id: 'preset:crimson', label: 'แดงเข้ม', bg: 'bg-[#c93022] text-white', Icon: Flame },
     { id: 'preset:amber', label: 'ทองอำพัน', bg: 'bg-[#b5730c] text-white', Icon: Crown },
@@ -27,9 +27,9 @@ export function PlayerAvatar({ name, avatar, isBot = false, isMaster = false, si
         <Bot className={iconSize}/>
       </div>);
     }
-    return (<div aria-hidden="true" className={`${sizeClass} flex shrink-0 items-center justify-center rounded-full font-bold ${isMaster
-            ? 'bg-[var(--accent-master)] text-white'
-            : 'bg-[var(--bg-subtle)] text-[var(--ink-primary)]'}`}>
-      {name.slice(0, 2).toUpperCase()}
+    return (<div aria-hidden="true" className={`${sizeClass} flex shrink-0 items-center justify-center rounded-full border ${isMaster
+            ? 'border-[var(--accent-master)] bg-[var(--accent-master)] text-white'
+            : 'border-[var(--border-card)] bg-[var(--bg-table)] text-[var(--accent-master)]'}`}>
+      <User className={iconSize}/>
     </div>);
 }

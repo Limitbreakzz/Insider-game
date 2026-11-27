@@ -61,8 +61,15 @@ export function LobbyPage() {
         void setCustomWord(nextWord);
     };
     const myPlayer = players.find((p) => p.id === me.id);
+    const bots = players.filter((p) => p.isBot);
     const unreadyGuestsCount = players.filter((p) => !p.isHost && !p.isReady).length;
     const canStart = me.isHost && players.length >= config.minPlayers && unreadyGuestsCount === 0;
+    const removeLastBot = () => {
+        const lastBot = bots[bots.length - 1];
+        if (lastBot) {
+            void kickPlayer(lastBot.id);
+        }
+    };
     const copyCode = async () => {
         try {
             await navigator.clipboard.writeText(roomCode);
@@ -91,24 +98,25 @@ export function LobbyPage() {
         const nextMin = Math.max(1, Math.min(10, questionMinutes + deltaMin));
         void updateConfig({ questionDurationSec: nextMin * 60 });
     };
-    return (<div className="mx-auto flex max-w-[1120px] flex-col gap-5 px-5 py-6" data-testid="phase-lobby">
-      {/* แถบบนแบบ Werewolf: QR + รหัสห้องอยู่ซ้าย, ปุ่มควบคุมอยู่ขวา */}
-      <div className="tabletop-card animate-card-pop flex flex-wrap items-center justify-between gap-4 rounded-2xl px-5 py-4">
-        <div className="flex flex-wrap items-center gap-3.5">
-          <QrCodeBox roomCode={roomCode} size={86}/>
-          <div>
+    return (<div className="mx-auto flex max-w-[1120px] flex-col gap-5 px-4 py-5 sm:px-5 sm:py-6" data-testid="phase-lobby">
+      {/* แถบบนแบบ Werewolf: QR + รหัสห้องอยู่ข้างกันเสมอทั้งมือถือและคอม */}
+      <div className="tabletop-card animate-card-pop flex flex-col gap-4 rounded-2xl p-4 sm:p-5 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center gap-4">
+          <div className="shrink-0">
+            <QrCodeBox roomCode={roomCode} size={88}/>
+          </div>
+          <div className="min-w-0 flex-1">
             <div className="text-xs font-medium text-[var(--ink-secondary)]">
-              สแกน QR หรือกรอกรหัสห้อง ({config.minPlayers}–{config.maxPlayers} คน)
+              สแกน QR หรือกรอกรหัสห้อง
             </div>
-            <div translate="no" data-testid="lobby-room-code" className="font-mono-code mt-0.5 text-2xl font-bold tracking-[0.2em]">
-              {roomCode}
-            </div>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <button type="button" onClick={() => void copyCode()} className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-card)] bg-[var(--bg-table)] px-2.5 py-1.5 text-xs font-semibold transition-colors hover:bg-[var(--bg-subtle)]">
-                {copiedCode ? (<Check aria-hidden="true" className="h-3.5 w-3.5 text-emerald-600"/>) : (<Copy aria-hidden="true" className="h-3.5 w-3.5"/>)}
-                {copiedCode ? 'คัดลอกรหัสแล้ว' : 'คัดลอกรหัส'}
-              </button>
-              <button type="button" data-testid="btn-copy-invite" onClick={() => void copyInviteLink()} className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-card)] bg-[var(--bg-table)] px-2.5 py-1.5 text-xs font-semibold transition-colors hover:bg-[var(--bg-subtle)]">
+            <button type="button" onClick={() => void copyCode()} title="คลิกเพื่อคัดลอกรหัสห้อง" className="group mt-0.5 inline-flex items-center gap-2 text-left">
+              <span translate="no" data-testid="lobby-room-code" className="font-mono-code text-2xl font-bold tracking-[0.2em] text-[var(--accent-master)] sm:text-3xl">
+                {roomCode}
+              </span>
+              {copiedCode ? (<Check aria-hidden="true" className="h-4 w-4 text-emerald-600"/>) : (<Copy aria-hidden="true" className="h-3.5 w-3.5 text-[var(--ink-secondary)] opacity-60 transition-opacity group-hover:opacity-100"/>)}
+            </button>
+            <div className="mt-2">
+              <button type="button" data-testid="btn-copy-invite" onClick={() => void copyInviteLink()} className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--border-card)] bg-[var(--bg-table)] px-3 py-1.5 text-xs font-semibold transition-colors hover:bg-[var(--bg-subtle)]">
                 {copiedLink ? (<Check aria-hidden="true" className="h-3.5 w-3.5 text-emerald-600"/>) : (<Link2 aria-hidden="true" className="h-3.5 w-3.5"/>)}
                 {copiedLink ? 'คัดลอกลิงก์แล้ว' : 'คัดลอกลิงก์ชวนเพื่อน'}
               </button>
@@ -116,29 +124,8 @@ export function LobbyPage() {
           </div>
         </div>
 
-        <div className="flex flex-col items-end gap-2.5">
+        <div className="flex flex-wrap items-center justify-start gap-2 md:justify-end">
           <UtilityBar showLeave/>
-          <div className="flex flex-wrap items-center justify-end gap-2">
-            {!me.isHost && (
-              <button type="button" data-testid="btn-toggle-ready" onClick={() => void setReady(!myPlayer?.isReady)} className={`h-10 rounded-xl px-4 text-sm font-bold transition-colors ${myPlayer?.isReady
-            ? 'border border-emerald-500/40 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
-            : 'border border-[var(--border-card)] bg-[var(--bg-subtle)] hover:opacity-90'}`}>
-                {myPlayer?.isReady ? 'พร้อมเล่นแล้ว ✓' : 'กดพร้อมเล่น'}
-              </button>
-            )}
-
-            {me.isHost && players.length < config.maxPlayers && (<button type="button" data-testid="btn-add-bot" onClick={() => void addBot()} className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-[var(--border-card)] bg-[var(--bg-card)] px-3.5 text-sm font-bold transition-colors hover:bg-[var(--bg-subtle)]">
-                <Bot aria-hidden="true" className="h-4 w-4 text-[var(--accent-commoner)]"/>
-                เพิ่มบอท (+1)
-              </button>)}
-
-            {me.isHost && (<button type="button" data-testid="btn-start-game" disabled={!canStart} onClick={() => void startGame()} className="inline-flex h-10 items-center gap-2 rounded-xl bg-[var(--accent-insider)] px-5 text-sm font-bold text-white transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-45">
-                <Play aria-hidden="true" className="h-4 w-4"/>
-                {unreadyGuestsCount > 0 && players.length >= config.minPlayers
-                  ? `รอเพื่อนพร้อมอีก ${unreadyGuestsCount} คน`
-                  : 'เริ่มเกมเลย'}
-              </button>)}
-          </div>
         </div>
       </div>
 
@@ -146,95 +133,100 @@ export function LobbyPage() {
           {error}
         </div>)}
 
-      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,0.95fr)]">
+      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
         {/* รายชื่อผู้เล่น */}
         <section className="tabletop-card rounded-2xl p-5">
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-3.5 flex items-center justify-between gap-2">
             <h2 className="flex items-center gap-2 font-display text-lg font-bold">
               <Users aria-hidden="true" className="h-5 w-5 text-[var(--accent-commoner)]"/>
-              <span className="tabular-nums">
-                ผู้เล่น ({players.length}/{config.maxPlayers})
+              <span>ผู้เล่นในโต๊ะ</span>
+              <span className="font-mono-code text-sm font-semibold text-[var(--ink-secondary)] tabular-nums">
+                ({players.length}/{config.maxPlayers})
               </span>
             </h2>
             {players.length < config.minPlayers && (<span className="rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300">
                 รออีก {config.minPlayers - players.length} คน
               </span>)}
           </div>
+
+          {me.isHost && (<div className="mb-4 flex flex-wrap items-center gap-2.5">
+              <button type="button" data-testid="btn-add-bot" disabled={players.length >= config.maxPlayers} onClick={() => void addBot()} className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-[var(--border-card)] bg-[var(--bg-table)] px-3.5 text-xs font-bold transition-colors hover:bg-[var(--bg-subtle)] disabled:cursor-not-allowed disabled:opacity-45">
+                <Plus aria-hidden="true" className="h-3.5 w-3.5"/>
+                เพิ่มบอท AI
+              </button>
+              <button type="button" data-testid="btn-remove-bot" disabled={bots.length === 0} onClick={removeLastBot} className="inline-flex h-9 items-center gap-1.5 rounded-xl px-2.5 text-xs font-semibold text-[var(--ink-secondary)] transition-colors hover:bg-[var(--bg-subtle)] hover:text-[var(--ink-primary)] disabled:cursor-not-allowed disabled:opacity-40">
+                <Minus aria-hidden="true" className="h-3.5 w-3.5"/>
+                ลบบอท
+              </button>
+            </div>)}
+
           <PlayerList players={players} myId={me.id} showReady canKick={me.isHost} onKick={(id) => void kickPlayer(id)}/>
+
+          <div className="mt-4 border-t border-[var(--border-card)] pt-4">
+            {!me.isHost ? (<button type="button" data-testid="btn-toggle-ready" onClick={() => void setReady(!myPlayer?.isReady)} className={`flex h-11 w-full items-center justify-center gap-2 rounded-xl px-4 text-sm font-bold transition-colors ${myPlayer?.isReady
+                ? 'border border-emerald-500/40 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
+                : 'bg-[var(--accent-insider)] text-white hover:opacity-95'}`}>
+                {myPlayer?.isReady ? 'พร้อมเล่นแล้ว ✓' : 'กดพร้อมเล่น'}
+              </button>) : (<button type="button" data-testid="btn-start-game" disabled={!canStart} onClick={() => void startGame()} className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--accent-insider)] px-5 text-sm font-bold text-white transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-45">
+                <Play aria-hidden="true" className="h-4 w-4"/>
+                {players.length < config.minPlayers
+                    ? `เริ่มเกมเลย (รอผู้เล่นครบ ${config.minPlayers} คน)`
+                    : unreadyGuestsCount > 0
+                        ? `รอเพื่อนกดพร้อมอีก ${unreadyGuestsCount} คน`
+                        : 'เริ่มเกมเลย'}
+              </button>)}
+          </div>
         </section>
 
-        {/* ตั้งค่ากติกา (Custom Tabletop Controls) */}
-        <section className="tabletop-card rounded-2xl p-5">
-          <div className="mb-4 flex items-center justify-between border-b border-[var(--border-card)] pb-3">
-            <h2 className="flex items-center gap-2 font-display text-lg font-bold">
-              <Settings2 aria-hidden="true" className="h-5 w-5 text-[var(--accent-master)]"/>
-              ตั้งค่ากติกา
-            </h2>
-            {!me.isHost && (<span className="rounded-full bg-[var(--bg-subtle)] px-2.5 py-0.5 text-[11px] font-semibold text-[var(--ink-secondary)]">
-                หัวหน้าห้องปรับได้
-              </span>)}
-          </div>
-
-          <div className="space-y-5 text-sm">
-            {/* โหมดการคุมเกม (เหมือน Werewolf: AUTO / NARRATOR / MANUAL_HOST) */}
-            <div>
-              <div className="mb-1.5 flex items-center justify-between gap-2">
-                <span className="text-xs font-bold text-[var(--ink-secondary)]">โหมดการคุมเกม</span>
-                {config.controlMode === 'NARRATOR' && (
-                  <button
-                    type="button"
-                    onClick={() => speakThai('ทดสอบเสียงบรรยายกลาง เกมอินไซเดอร์พร้อมเริ่มแล้ว')}
-                    className="inline-flex items-center gap-1 rounded-lg border border-[var(--accent-master)]/40 bg-[var(--accent-master)]/10 px-2 py-0.5 text-[11px] font-bold text-[var(--accent-master)] transition-colors hover:bg-[var(--accent-master)]/20"
-                  >
-                    <Volume2 aria-hidden="true" className="h-3 w-3" />
-                    ทดสอบเสียงบรรยาย
-                  </button>
-                )}
-              </div>
-              <div className="space-y-2" data-testid="config-control-mode">
-                {CONTROL_MODES.map((m) => {
-                  const Icon = m.Icon;
-                  const active = (config.controlMode || 'AUTO') === m.id;
-                  return (
-                    <button
-                      key={m.id}
-                      type="button"
-                      disabled={!me.isHost}
-                      data-testid={`control-mode-${m.id}`}
-                      aria-pressed={active}
-                      onClick={() => void updateConfig({ controlMode: m.id })}
-                      className={`flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
-                        active
-                          ? 'border-[var(--accent-insider)] bg-[var(--accent-insider)]/10'
-                          : 'border-[var(--border-card)] bg-[var(--bg-table)] hover:border-[var(--ink-secondary)]/50'
-                      }`}
-                    >
-                      <div
-                        className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-                          active
-                            ? 'bg-[var(--accent-insider)] text-white'
-                            : 'bg-[var(--bg-subtle)] text-[var(--ink-secondary)]'
-                        }`}
-                      >
-                        <Icon aria-hidden="true" className="h-4 w-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <div
-                          className={`text-xs font-bold ${
-                            active ? 'text-[var(--accent-insider)]' : 'text-[var(--ink-primary)]'
-                          }`}
-                        >
-                          {m.title}
-                        </div>
-                        <div className="mt-0.5 text-[11px] leading-snug text-[var(--ink-secondary)]">
-                          {m.desc}
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
+        {/* คอลัมน์ขวา: แยกการ์ดโหมดการคุมเกม + การ์ดตั้งค่ากติกาและเวลา แบบ Werewolf */}
+        <div className="flex flex-col gap-5">
+          {/* การ์ด 1: โหมดการคุมเกม */}
+          <section className="tabletop-card rounded-2xl p-5">
+            <div className="mb-3.5 flex items-center justify-between gap-2">
+              <h2 className="font-display text-lg font-bold">โหมดการคุมเกม</h2>
+              {config.controlMode === 'NARRATOR' && (<button type="button" onClick={() => speakThai('ทดสอบเสียงบรรยายกลาง เกมอินไซเดอร์พร้อมเริ่มแล้ว')} className="inline-flex items-center gap-1 rounded-lg border border-[var(--accent-master)]/40 bg-[var(--accent-master)]/10 px-2.5 py-1 text-[11px] font-bold text-[var(--accent-master)] transition-colors hover:bg-[var(--accent-master)]/20">
+                  <Volume2 aria-hidden="true" className="h-3.5 w-3.5"/>
+                  ทดสอบเสียง
+                </button>)}
             </div>
+            <div className="space-y-2.5" data-testid="config-control-mode">
+              {CONTROL_MODES.map((m) => {
+                const Icon = m.Icon;
+                const active = (config.controlMode || 'AUTO') === m.id;
+                return (<button key={m.id} type="button" disabled={!me.isHost} data-testid={`control-mode-${m.id}`} aria-pressed={active} onClick={() => void updateConfig({ controlMode: m.id })} className={`flex w-full items-start gap-3 rounded-xl border p-3.5 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${active
+                        ? 'border-[var(--accent-master)]/70 bg-[var(--accent-master)]/10'
+                        : 'border-[var(--border-card)] bg-[var(--bg-table)] hover:border-[var(--ink-secondary)]/50'}`}>
+                    <div className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${active
+                            ? 'bg-[var(--accent-master)]/20 text-[var(--accent-master)]'
+                            : 'bg-[var(--bg-subtle)] text-[var(--ink-secondary)]'}`}>
+                      <Icon aria-hidden="true" className="h-4 w-4"/>
+                    </div>
+                    <div className="min-w-0">
+                      <div className={`text-sm font-bold ${active ? 'text-[var(--ink-primary)]' : 'text-[var(--ink-primary)]'}`}>
+                        {m.title}
+                      </div>
+                      <div className="mt-0.5 text-xs leading-relaxed text-[var(--ink-secondary)]">
+                        {m.desc}
+                      </div>
+                    </div>
+                  </button>);
+            })}
+            </div>
+          </section>
+
+          {/* การ์ด 2: ตั้งค่ากติกาและเวลา */}
+          <section className="tabletop-card rounded-2xl p-5">
+            <div className="mb-4 flex items-center justify-between border-b border-[var(--border-card)] pb-3">
+              <h2 className="flex items-center gap-2 font-display text-lg font-bold">
+                <Settings2 aria-hidden="true" className="h-5 w-5 text-[var(--accent-master)]"/>
+                ตั้งค่ากติกาและเวลา
+              </h2>
+              {!me.isHost && (<span className="rounded-full bg-[var(--bg-subtle)] px-2.5 py-0.5 text-[11px] font-semibold text-[var(--ink-secondary)]">
+                  หัวหน้าห้องปรับได้
+                </span>)}
+            </div>
+
+            <div className="space-y-5 text-sm">
 
             {/* เวลาเฟสถาม-ตอบ: Preset pills + Stepper (หน่วยเป็นนาที) */}
             <div>
@@ -445,8 +437,9 @@ export function LobbyPage() {
                 <span aria-hidden="true" className={`inline-block h-4.5 w-4.5 rounded-full bg-white shadow-xs transition-transform duration-200 ${config.masterCanVote ? 'translate-x-5.5' : 'translate-x-1'}`}/>
               </button>
             </div>
-          </div>
-        </section>
+            </div>
+          </section>
+        </div>
       </div>
     </div>);
 }

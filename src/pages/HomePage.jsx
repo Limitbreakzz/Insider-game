@@ -1,6 +1,5 @@
 import { BookOpen, DoorOpen, KeyRound, RotateCcw, Shield, Trash2, Upload, User, Users, X, Zap, } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { PlayerAvatar } from '../components/PlayerAvatar';
 import { UtilityBar } from '../components/UtilityBar';
 import { compressAvatarFile } from '../lib/imageUtils';
 import { useGameStore } from '../store/useGameStore';
