@@ -1,4 +1,4 @@
-import { Bot, Check, Clock, Copy, Link2, Minus, Play, Plus, Settings2, ShieldCheck, Smartphone, Sparkles, Trash2, Users, Volume2, X } from 'lucide-react';
+import { Bot, Check, Clock, Copy, Eye, EyeOff, Link2, Minus, Play, Plus, Settings2, ShieldCheck, Smartphone, Sparkles, Trash2, Users, Volume2 } from 'lucide-react';
 import { useState } from 'react';
 import { GameSelect } from '../components/GameSelect';
 import { PlayerList } from '../components/PlayerList';
@@ -29,7 +29,6 @@ const CONTROL_MODES = [
 ];
 const CATEGORIES = [
     { value: 'ALL', label: 'ทุกหมวดหมู่ (สุ่มทั้งหมด)', hint: 'รวมคำลับทั้ง 80 คำทุกหมวด' },
-    { value: 'CUSTOM', label: 'คำลับที่เพิ่มเอง (Custom)', hint: 'สุ่มจากคำลับที่หัวหน้าห้องพิมพ์เพิ่มเอง' },
     { value: 'EVERYDAY', label: 'ของใช้ใกล้ตัว', hint: 'ร่ม, เข็มทิศ, นาฬิกาทราย…' },
     { value: 'FOOD', label: 'อาหารและเครื่องดื่ม', hint: 'ผัดไทย, ส้มตำ, ครัวซองต์…' },
     { value: 'NATURE', label: 'ธรรมชาติและสัตว์', hint: 'ภูเขาไฟ, แสงเหนือ, ปลาหมึกยักษ์…' },
@@ -42,35 +41,24 @@ const TIME_PRESETS = [
     { sec: 420, label: '7 นาที' },
 ];
 export function LobbyPage() {
-    const { gameState, setReady, startGame, updateConfig, updateCustomWords, addBot, kickPlayer, error } = useGameStore();
+    const { gameState, setReady, startGame, updateConfig, setCustomWord, addBot, kickPlayer, error } = useGameStore();
     const [copiedCode, setCopiedCode] = useState(false);
     const [copiedLink, setCopiedLink] = useState(false);
     const [wordDraft, setWordDraft] = useState('');
+    const [showCustomWord, setShowCustomWord] = useState(false);
     if (!gameState)
         return null;
     const { roomCode, players, me, config } = gameState;
-    const customWords = gameState.customWords ?? [];
-    const customWordCount = gameState.customWordCount ?? 0;
+    const customWord = gameState.customWord ?? '';
+    const hasCustomWord = Boolean(gameState.hasCustomWord);
 
-    const handleAddCustomWords = (e) => {
+    const handleSetCustomWord = (e) => {
         e.preventDefault();
         if (!me.isHost || !wordDraft.trim())
             return;
-        const incoming = wordDraft
-            .split(/[,\n]+/)
-            .map((w) => w.trim())
-            .filter(Boolean);
-        if (incoming.length === 0)
-            return;
-        const merged = [...customWords, ...incoming];
+        const nextWord = wordDraft.trim();
         setWordDraft('');
-        void updateCustomWords(merged);
-    };
-
-    const handleRemoveCustomWord = (wordToRemove) => {
-        if (!me.isHost)
-            return;
-        void updateCustomWords(customWords.filter((w) => w !== wordToRemove));
+        void setCustomWord(nextWord);
     };
     const myPlayer = players.find((p) => p.id === me.id);
     const unreadyGuestsCount = players.filter((p) => !p.isHost && !p.isReady).length;
@@ -361,79 +349,84 @@ export function LobbyPage() {
             {/* หมวดหมู่คำลับ: Custom Styled Dropdown */}
             <GameSelect label="หมวดหมู่คำลับ" value={config.wordCategory} options={CATEGORIES} disabled={!me.isHost} testId="config-word-category" onChange={(wordCategory) => void updateConfig({ wordCategory })}/>
 
-            {/* เพิ่มคำลับเอง (Custom Words — เฉพาะหัวหน้าห้องเห็นรายการเพื่อกันคนอื่นแอบดู) */}
+            {/* กำหนดคำลับสำหรับรอบนี้โดยตรง (ไม่ใส่ = สุ่มจากหมวดหมู่) */}
             <div className="space-y-2.5 rounded-xl border border-[var(--border-card)] bg-[var(--bg-table)] p-3.5">
               <div className="flex items-center justify-between gap-2">
                 <span className="flex items-center gap-1.5 text-xs font-bold text-[var(--ink-primary)]">
                   <Sparkles aria-hidden="true" className="h-3.5 w-3.5 text-[var(--accent-master)]" />
-                  เพิ่มคำลับเอง ({customWordCount} คำ)
+                  กำหนดคำลับสำหรับรอบนี้
                 </span>
-                {me.isHost && customWords.length > 0 && (
+                {me.isHost && hasCustomWord && (
                   <button
                     type="button"
-                    onClick={() => void updateCustomWords([])}
+                    onClick={() => void setCustomWord('')}
                     className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold text-red-600 transition-colors hover:bg-red-500/10 dark:text-red-400"
                   >
                     <Trash2 aria-hidden="true" className="h-3 w-3" />
-                    ล้างทั้งหมด
+                    ล้าง (กลับไปสุ่ม)
                   </button>
                 )}
               </div>
 
               {me.isHost ? (
                 <>
-                  <form onSubmit={handleAddCustomWords} className="flex gap-2">
+                  <form onSubmit={handleSetCustomWord} className="flex gap-2">
                     <input
-                      type="text"
+                      type={showCustomWord ? 'text' : 'password'}
                       data-testid="input-custom-word"
-                      maxLength={120}
+                      maxLength={40}
                       autoComplete="off"
-                      placeholder="พิมพ์คำลับ (คั่นด้วย , เพื่อเพิ่มหลายคำ)…"
+                      placeholder="พิมพ์คำลับที่จะใช้ในรอบนี้เลย…"
                       value={wordDraft}
                       onChange={(e) => setWordDraft(e.target.value)}
                       className="min-w-0 flex-1 rounded-lg border border-[var(--border-card)] bg-[var(--bg-card)] px-3 py-1.5 text-xs font-medium text-[var(--ink-primary)] focus:border-[var(--accent-insider)]"
                     />
+                    <button
+                      type="button"
+                      aria-label={showCustomWord ? 'ซ่อนคำที่พิมพ์' : 'แสดงคำที่พิมพ์'}
+                      onClick={() => setShowCustomWord((v) => !v)}
+                      className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--border-card)] bg-[var(--bg-card)] text-[var(--ink-secondary)] hover:bg-[var(--bg-subtle)]"
+                    >
+                      {showCustomWord ? (
+                        <EyeOff aria-hidden="true" className="h-3.5 w-3.5" />
+                      ) : (
+                        <Eye aria-hidden="true" className="h-3.5 w-3.5" />
+                      )}
+                    </button>
                     <button
                       type="submit"
                       data-testid="btn-add-custom-word"
                       disabled={!wordDraft.trim()}
                       className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-[var(--accent-master)] px-3 py-1.5 text-xs font-bold text-white transition-opacity hover:opacity-95 disabled:opacity-45"
                     >
-                      <Plus aria-hidden="true" className="h-3.5 w-3.5" />
-                      เพิ่ม
+                      <Check aria-hidden="true" className="h-3.5 w-3.5" />
+                      ใช้คำนี้
                     </button>
                   </form>
 
-                  {customWords.length > 0 ? (
-                    <div className="flex flex-wrap gap-1.5 pt-1" data-testid="custom-word-list">
-                      {customWords.map((w) => (
-                        <span
-                          key={w}
-                          className="inline-flex items-center gap-1 rounded-full border border-[var(--accent-master)]/35 bg-[var(--bg-card)] px-2.5 py-0.5 text-xs font-semibold text-[var(--ink-primary)]"
-                        >
-                          <span>{w}</span>
-                          <button
-                            type="button"
-                            aria-label={`ลบคำว่า ${w}`}
-                            onClick={() => handleRemoveCustomWord(w)}
-                            className="rounded-full p-0.5 text-[var(--ink-secondary)] hover:bg-red-500/15 hover:text-red-600"
-                          >
-                            <X aria-hidden="true" className="h-3 w-3" />
-                          </button>
-                        </span>
-                      ))}
+                  {hasCustomWord ? (
+                    <div
+                      data-testid="custom-word-active"
+                      className="flex items-center justify-between rounded-lg border border-[var(--accent-master)]/40 bg-[var(--accent-master)]/10 px-3 py-2 text-xs"
+                    >
+                      <span className="font-semibold text-[var(--accent-master)]">
+                        ล็อกคำลับรอบนี้แล้ว:
+                      </span>
+                      <span className="font-bold text-[var(--ink-primary)]">
+                        {showCustomWord ? customWord : '••••••••'}
+                      </span>
                     </div>
                   ) : (
                     <p className="text-[11px] text-[var(--ink-secondary)]">
-                      พิมพ์คำที่อยากเล่นเอง (เช่น ชื่อเพื่อน, หมูกระทะ, ชานมไข่มุก) ระบบจะซ่อนรายการนี้จากผู้เล่นคนอื่นในห้อง
+                      หากกำหนดคำตรงนี้ รอบถัดไปจะใช้คำนี้เป็นคำลับทันที (หากเว้นว่าง ระบบจะสุ่มจากหมวดด้านบน และล้างอัตโนมัติหลังจบรอบ)
                     </p>
                   )}
                 </>
               ) : (
                 <p className="text-[11px] text-[var(--ink-secondary)]">
-                  {customWordCount > 0
-                    ? `หัวหน้าห้องเตรียมคำลับพิเศษไว้ ${customWordCount} คำ (ซ่อนไว้เพื่อกันสปอยล์)`
-                    : 'ยังไม่มีคำลับที่เพิ่มเอง (ใช้คลังคำลับมาตรฐาน)'}
+                  {hasCustomWord
+                    ? 'หัวหน้าห้องกำหนดคำลับพิเศษสำหรับรอบนี้ไว้แล้ว (ซ่อนไว้เพื่อกันสปอยล์)'
+                    : 'ใช้การสุ่มคำลับจากหมวดหมู่ที่เลือก'}
                 </p>
               )}
             </div>

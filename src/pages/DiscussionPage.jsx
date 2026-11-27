@@ -9,6 +9,7 @@ import { useGameStore } from '../store/useGameStore';
 const ANSWER_TH = {
     YES: 'ใช่',
     NO: 'ไม่ใช่',
+    MAYBE: 'อาจจะ',
     UNKNOWN: 'ไม่รู้',
     CORRECT: 'ถูกต้อง!',
 };

@@ -16,6 +16,10 @@ const ANSWER_STYLES = {
         label: 'ไม่ใช่',
         className: 'bg-red-500/15 text-red-700 border-red-500/30 dark:text-red-300',
     },
+    MAYBE: {
+        label: 'อาจจะ',
+        className: 'bg-indigo-500/15 text-indigo-700 border-indigo-500/30 dark:text-indigo-300',
+    },
     UNKNOWN: {
         label: 'ไม่รู้',
         className: 'bg-amber-500/15 text-amber-700 border-amber-500/30 dark:text-amber-300',
@@ -119,6 +123,9 @@ export function QuestionPage() {
                           <button type="button" data-testid="btn-answer-no" onClick={() => void answerQuestion(q.id, 'NO')} className="inline-flex items-center gap-1 rounded-lg bg-red-600 px-2.5 py-1 text-xs font-bold text-white transition-colors hover:bg-red-700">
                             <X aria-hidden="true" className="h-3.5 w-3.5"/>
                             ไม่ใช่
+                          </button>
+                          <button type="button" data-testid="btn-answer-maybe" onClick={() => void answerQuestion(q.id, 'MAYBE')} className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-2.5 py-1 text-xs font-bold text-white transition-colors hover:bg-indigo-700">
+                            อาจจะ
                           </button>
                           <button type="button" data-testid="btn-answer-unknown" onClick={() => void answerQuestion(q.id, 'UNKNOWN')} className="inline-flex items-center gap-1 rounded-lg border border-[var(--border-card)] bg-[var(--bg-card)] px-2.5 py-1 text-xs font-bold transition-colors hover:bg-[var(--bg-subtle)]">
                             <HelpCircle aria-hidden="true" className="h-3.5 w-3.5"/>
